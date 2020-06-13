@@ -141,12 +141,16 @@ master_merged <- merge(master, answers_master, by = c('Round', 'Number'))
 setDT(master_merged)
 master_merged$Round <- factor(master_merged$Round,
                               levels = c('1', '2', 'Interlude', '3', '4'))
-master_merged[order(Round, Number)]
+master_merged <- master_merged[order(Round, Number)]
 master_merged[, Cumulative.Score := cumsum(Correct * Points), by = list(Name)]
 score_df <- master_merged[, .(scores = sum(Correct * Points)), by = 'Name']
 #progression chart
+master_merged$order <- paste0(master_merged$Round, ' - ', master_merged$Number)
+master_merged$order <- factor(master_merged$order,
+                              levels = unique(master_merged$order))
 ggplot(master_merged) + 
-  geom_line(aes(x=paste0(Round, '-', Number), y=Cumulative.Score, group=Name, color=Name)) +
+  geom_point(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
+  geom_line(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
   xlab('Round - Question') +
   ggtitle('Trivia Night Score Progression') +
   theme(panel.grid.minor = element_blank())
