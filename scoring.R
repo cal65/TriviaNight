@@ -8,7 +8,7 @@ library(stringr)
 library(stringi)
 library(plyr)
 options(stringsAsFactors = F)
-setwd('~/Documents/CAL/Real_Life/Blog Posts/TriviaNight/')
+setwd('~/repository//TriviaNight/')
 sheet_results <- drive_find(type = "spreadsheet")
 #sheet lookups by name
 ids <- vector('list')
@@ -17,7 +17,7 @@ responses_melted  <- vector('list')
 graded_responses <- vector('list')
 ids[[1]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 (Responses)"),]$id
 ids[[2]] <- sheet_results[which(sheet_results$name == "Trivia - Round 2 (Responses)"),]$id
-ids[[3]] <- sheet_results[which(sheet_results$name == "Trivia - Round 3 (Responses)"),]$id
+ids[[3]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Round 3 (Responses)"),]$id
 ids[[4]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Round 4 (Responses)"),]$id
 id_answers <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Answers"),]$id
 
@@ -106,7 +106,7 @@ plot_graded_answers <- function(graded_df, round_num, save = T){
     theme(plot.title = element_text(hjust=0.5), panel.background = element_blank())
   print(p)
   if (save){
-    ggsave(paste0('Responses_Round', round_num, '.jpeg'), width= 12, height=9)
+    ggsave(paste0('Responses_Round', round_num, '.jpeg'), width= 18, height=9)
   }
 }
 #plot
@@ -124,33 +124,99 @@ n <- 4
 responses[[n]] <- getResponses(n)
 responses_melted[[n]] <- formatForAnswers(responses[[n]])
 graded_responses[[n]] <- gradeResponses(n, responses_melted[[n]])
-plot_graded_answers(graded_responses[[1]], 1)
+plot_graded_answers(graded_responses[[n]], n)
 
-changeGrading(graded_responses[[4]], team = 'Answers', number = 3)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'nerd immunity', number = 1)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Calenteam', number = 5)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'CAL機', number = 5)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 8)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 10)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 2)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'nerd immunity', number = 2)
+graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'CAL機', number = 2)
+
+graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'HydroxyCALoquine', number = 4)
+graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'nerd immunity', number = 4)
+graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'Quarantina Aguilera', number = 3)
+graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'nerd immunity', number = 8)
+
+
+graded_responses[[4]] <- changeGrading(graded_responses[[4]], team = 'nerd immunity', number = 8)
+
+scored_list = vector('list')
+for (i in 1:4){
+  scored_list[[i]] <- graded_responses[[i]][, .(scores = sum(as.numeric(Correct))), by = Name]
+  scored_list[[i]]$Round <- i
+}
+
 
 #the interlude format doesn't really fit in the same, so I'll write in manually
-graded_responses[['Interlude']] <- data.frame(Name = c('8-Tracks', 'Answers'),
-                                              Number = c(4, 1),
-                                              Answer = c('James Baldwin', 'James Baldwin'),
-                                              Correct = c(T, T),
-                                              Round = rep('Interlude', 2) )
+graded_responses[['Interlude']] <- data.frame(Name = c('Quarantina Aguilera', 'HydroxyCALoquine', 'CAL機', 'nerd immunity',
+                                                       'Harem', 'Calenteam'),
+                 Number = c(2, 2, 1, 1, 3, 2),
+                 Answer = c('James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin'),
+                 #Correct = c(T, T, T, T, T, T),
+                 Correct = c(8, 8, 10, 10, 6, 8),
+                 Round = rep('Interlude', 6) )
+graded_responses[['Interlude']] <- setDT(graded_responses[['Interlude']])
+scored_list[['Interlude']] <- graded_responses[['Interlude']][, .(scores = sum(Correct)), by = Name]
+all_scores <- do.call('rbind.fill', scored_list)
+setDT(all_scores)
+all_answers <- do.call(rbind.fill, graded_responses)
+
+all_scores[, .(scores = sum(scores)), by=Name]
+write.csv(all_scores, 'all_scores.csv')
 #finals
 master <- do.call( 'rbind.fill', graded_responses)
 master$Round <- as.character(master$Round)
 master_merged <- merge(master, answers_master, by = c('Round', 'Number'))
+
+master_merged <- read.csv('all_scores.csv')
 setDT(master_merged)
+
 master_merged$Round <- factor(master_merged$Round,
                               levels = c('1', '2', 'Interlude', '3', '4'))
 master_merged <- master_merged[order(Round, Number)]
-master_merged[, Cumulative.Score := cumsum(Correct * Points), by = list(Name)]
-score_df <- master_merged[, .(scores = sum(Correct * Points)), by = 'Name']
+master_merged[, Cumulative.Score := cumsum(scores), by = list(Name)]
+score_df <- master_merged[, .(scores = sum(scores)), by = 'Name']
 #progression chart
 master_merged$order <- paste0(master_merged$Round, ' - ', master_merged$Number)
 master_merged$order <- factor(master_merged$order,
                               levels = unique(master_merged$order))
+
+
 ggplot(master_merged) + 
   geom_point(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
   geom_line(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
   xlab('Round - Question') +
   ggtitle('Trivia Night Score Progression') +
   theme(panel.grid.minor = element_blank())
+
+setDT(all_answers)
+all_answers$Round <- factor(all_answers$Round,
+                              levels = c('1', '2', 'Interlude', '3', '4'))
+all_answers <- all_answers[order(Round)]
+all_answers$order <- paste0(all_answers$Round, ' - ', all_answers$Number)
+all_answers$order <- factor(all_answers$order,
+                            levels = unique(all_answers$order))
+all_answers$Point <- as.numeric(as.character((mapvalues(all_answers$Round, from = c('1', '2', '3', '4', 'Interlude'), to = c(1, 1, 2, 5, 1)))))
+#assigning some half correct answers
+all_answers[Round == '4' & Name == 'Quarantina Aguilera' & Number %in% c(2, 3)]$Correct <- 0.5
+all_answers[Round == '4' & Name == 'Harem' & Number == 2]$Correct <- 0.5
+all_answers[Round == '4' & Name == 'nerd immunity' & Number == 2]$Correct  <- 0.5
+
+all_answers$Score <- all_answers$Correct * all_answers$Point
+
+all_answers[, Cumulative.Score := cumsum(Score), by = list(Name)]
+
+showtext_auto()
+ggplot(all_answers[Name != 'Answers']) + 
+  geom_point(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
+  geom_line(aes(x=order, y=Cumulative.Score, group=Name, color=Name)) +
+  xlab('Round - Question') +
+  scale_color_brewer(palette = 'Set1', 'Team Name') +
+  ggtitle('Trivia Night Score Progression') +
+  theme(panel.grid.minor = element_blank(),
+        text = element_text(family = 'STFangsong', size=12),
+        axis.text.x = element_text(angle=90))
+ggsave('Score_Progression.jpeg', width= 15, height=9, dpi=150)
