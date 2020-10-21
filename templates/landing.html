@@ -1,0 +1,58 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Three Roads Meeting</title>
+  <meta name="description" content="Three Roads Meeting">
+  <meta name="author" content="Cal Lee">
+
+  <link rel="stylesheet" href="/static/css/styles.css">
+
+</head>
+
+<body>
+	<h1> Trivia Hosting </h1>
+
+	<img id="panel" class="QuestionPanel--block" src="/static/question_panel.jpg" style="width:100x; height:220px;"></img>
+	<br>
+	<form class='form1'>
+		<div class = "form-group">
+			<label for = "userInput">Username</label>
+			<input type="text" class="form-control" id="userInput" placeholder="Username">
+		</div>
+	</form>
+	<button type="button" id = "button-load" > Load Questions </button> 
+	<button type="button" id = "button-write" onclick="location.href='question-form';"> Write Questions </button>
+	<br>
+	<div class="panel1" id="panel1">
+		Loaded Questions <br>
+		More content
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<script>
+	$(document).ready(function() {
+		$('#button-load').on('click', function(event) {
+					$.ajax({
+						load : { 
+							user: $('#userInput').val()
+						},
+						type : 'POST',
+						url : '/load-question'
+					})
+					.done(function(load){
+						$('#panel1').text(load.question).show(200);
+					});
+		});
+	});
+</script>
+</body>
+<br>
+<br>
+<b>
+	Hello
+</b>
+
+</html>

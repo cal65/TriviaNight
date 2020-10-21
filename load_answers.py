@@ -7,8 +7,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__) 
 
-app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.sqlite3'
-db = SQLAlchemy(app)
 
 @app.route("/hi") 
 def welcome(): 
@@ -16,7 +14,11 @@ def welcome():
 
 @app.route("/")
 def home():
-  	return render_template("base.html")
+  	return render_template("landing.html")
+
+@app.route("/question-form")
+def question_form():
+  	return render_template("form-page.html")
 
 @app.route('/return-all')
 def return_all():
@@ -27,11 +29,16 @@ def return_all():
 def user(user_id):
 	return f'<h1>{user_id}</h1>'
 
+@app.route('/load-question', methods=['POST'])
+def load_questions():
+	user = request.form['user']
+	#session.query(user).filter(user.author_id==user)
+	return jsonify({'question': "Question by " + user + ": What is this?"})
 
 @app.route("/create-question", methods=['POST', 'GET'])
 def add_question():
 	if request.method == 'POST':
-		print ("HI", flush=True)
+		# print ("HI", flush=True)
 		content = request.get_json(force=True)
 		question = content['question']
 		author_id = content['author_id']
@@ -46,13 +53,6 @@ def add_question():
 		db.session.commit()
 		return author_id + ": " + question
 	else:
-		return 'Sorry' + str(request)
-
-
-
-db.create_all()
-db.session.commit()
-
-
+		return 'Sorry: ' + str(request)
 
 app.run(port=9999)
