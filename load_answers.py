@@ -2,11 +2,11 @@ from flask import Flask, render_template, request, jsonify
 import requests
 from flask_sqlalchemy import SQLAlchemy
 import logging
-from db import Questions, Responses
+from application import db
+from application.data import Questions, Responses
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__) 
-
 
 @app.route("/hi") 
 def welcome(): 
@@ -31,9 +31,12 @@ def user(user_id):
 
 @app.route('/load-question', methods=['POST'])
 def load_questions():
-	user = request.form['user']
 	#session.query(user).filter(user.author_id==user)
-	return jsonify({'question': "Question by " + user + ": What is this?"})
+	user = request.form['user']
+	if type(user) == str and len(user) > 0:
+			return jsonify({'question': "Question by " + user + ": What is this?"})
+		
+	return jsonify({'error' : 'Missing data!'})
 
 @app.route("/create-question", methods=['POST', 'GET'])
 def add_question():
@@ -55,4 +58,5 @@ def add_question():
 	else:
 		return 'Sorry: ' + str(request)
 
-app.run(port=9999)
+if __name__ == '__main__':
+	app.run(port=9999)

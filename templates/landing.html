@@ -13,41 +13,42 @@
 </head>
 
 <body>
-	<h1> Trivia Hosting </h1>
-
-	<img id="panel" class="QuestionPanel--block" src="/static/question_panel.jpg" style="width:100x; height:220px;"></img>
-	<br>
-	<form class='form1'>
-		<div class = "form-group">
-			<label for = "userInput">Username</label>
-			<input type="text" class="form-control" id="userInput" placeholder="Username">
-		</div>
-	</form>
-	<button type="button" id = "button-load" > Load Questions </button> 
-	<button type="button" id = "button-write" onclick="location.href='question-form';"> Write Questions </button>
-	<br>
-	<div class="panel1" id="panel1">
-		Loaded Questions <br>
-		More content
+	<div class="head-div">
+		<img id="panel" class="QuestionPanel--block" src="/static/question_panel.jpg" style="width:100x; height:220px;"></img>
+		<h1> Trivia Hosting </h1>
 	</div>
+
+	<br>
+	<div class = "form-group">
+		<label for = "userInput">Username</label>
+		<input type="text" class="form-control" id="userInput" placeholder="Username">
+	</div>
+	<div class ="center">
+		<button type="button" id = "button-load"> Load Questions </button>
+		<button type="button" id = "button-load" onclick="location.href='question-form';"> Write Questions </button>
+	</div>
+	<br>
+	<div class="panel1" id="panel1" role="alert"> </div>
+	<button type="hidden-button" id = "hidden-button-1"> Next Question </button>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 	<script>
 	$(document).ready(function() {
 		$('#button-load').on('click', function(event) {
 					$.ajax({
-						load : { 
+						data : { 
 							user: $('#userInput').val()
 						},
 						type : 'POST',
 						url : '/load-question'
 					})
-					.done(function(load){
-						$('#panel1').text(load.question).show(200);
+					.done(function(data){
+						$('#panel1').text(data.question).show(200);
+						$('$hidden-button-1').show(200);
 					});
 		});
 	});
-</script>
+	</script>
 </body>
 <br>
 <br>
