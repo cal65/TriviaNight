@@ -15,17 +15,22 @@ ids <- vector('list')
 responses <- vector('list')
 responses_melted  <- vector('list')
 graded_responses <- vector('list')
-ids[[1]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 (Responses)"),]$id
-ids[[2]] <- sheet_results[which(sheet_results$name == "Trivia - Round 2 (Responses)"),]$id
-ids[[3]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Round 3 (Responses)"),]$id
-ids[[4]] <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Round 4 (Responses)"),]$id
-id_answers <- sheet_results[which(sheet_results$name == "Trivia June 2020 - Answers"),]$id
+#sheet_names <- c('Trivia June 2020 (Responses)', "Trivia - Round 2 (Responses)",
+#                 "Trivia June 2020 - Round 3 (Responses)", "Trivia June 2020 - Round 4 (Responses)")
+sheet_names <- c("Trivia Jan 2021 Round 1 - Second Acts (Responses)", 
+                 "Trivia Jan 2021 - Round 2 - Scientific Signs (Responses)",
+                 "Trivia Jan 2021 - Round 3 - The Eurasian Step (Responses)")
+for (i in 1:length(sheet_names)){
+  ids[[i]]  <- sheet_results[which(sheet_results$name == sheet_names[i]),]$id
+}
+
+id_answers <- sheet_results[which(sheet_results$name == "Trivia January 2021 - Answers"),]$id
 
 answers_master <- setDT(read_sheet(id_answers))
 answers_master$Round <- as.character(unlist(answers_master$Round))
 answers <- vector('list')
 #initiate answer list
-for (i in 1:4){
+for (i in 1:length(ids)){
   answers[[i]] <- answers_master[Round == i]
 }
 
@@ -40,9 +45,6 @@ getResponses <- function(round_num){
   return(responses_df)
 }
 
-
-responses[[1]] <- getResponses(1)
-
 formatForAnswers <- function(responses_df){
   responses.m  <- melt(responses_df, id = 'Name', variable.name = 'Question', value.name = 'Answer')
   #extract number from the question string
@@ -56,15 +58,14 @@ formatForAnswers <- function(responses_df){
                              levels = unique(responses.m$Question))
   return (responses.m)
 }
+
 #reshaping data and dropping timestamp column so that we can add a new Graded column
-
-responses_melted[[1]] <- formatForAnswers(responses[[1]])
-
-gradeResponses <- function(round_num, melted_response){
+gradeResponses <- function(round_num, melted_response, max_dist=0.2){
   num_questions <- max(answers[[round_num]]$Number)
   for (i in 1:num_questions){
     for (team_name in unique(melted_response$Name)){
-      corrects <- GetCloseMatches(answers[[round_num]]$Answer[i], melted_response[Number == i]$Answer)
+      corrects <- agrep(answers[[round_num]]$Answer[i], melted_response[Number == i]$Answer, 
+                        value=T, max.distance=max_dist)
       #additionally, if the answer is not a close match but is contained within the true answer, it should count
       additional <- unique(grep(answers[[round_num]]$Answer[i], melted_response[Number == i]$Answer, 
                                 value=T, ignore.case = T))
@@ -93,12 +94,15 @@ gradeResponses <- function(round_num, melted_response){
   return(melted_response)
 }
 
+cr <- 1 # current round
+responses[[cr]] <- getResponses(cr)
+responses_melted[[1]] <- formatForAnswers(responses[[1]])
 graded_responses[[1]] <- gradeResponses(1, responses_melted[[1]])
 
 #plot function
 plot_graded_answers <- function(graded_df, round_num, save = T){
   p <- ggplot(graded_df) + 
-    geom_tile(aes(x=Name, y=Question_Formatted, fill=Correct), color='black', alpha=0.7) +
+    geom_tile(aes(x=Name, y=Question_Formatted, fill=Correct), color='black', alpha=0.4) +
     geom_text(aes(x=Name, y=Question_Formatted, label = Answer)) +
     scale_fill_brewer(palette = 'Set1') +
     ylab('Question') +
@@ -126,45 +130,30 @@ responses_melted[[n]] <- formatForAnswers(responses[[n]])
 graded_responses[[n]] <- gradeResponses(n, responses_melted[[n]])
 plot_graded_answers(graded_responses[[n]], n)
 
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'nerd immunity', number = 1)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Calenteam', number = 5)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'CAL機', number = 5)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 8)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 10)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'Quarantina Aguilera', number = 2)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'nerd immunity', number = 2)
-graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'CAL機', number = 2)
-
-graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'HydroxyCALoquine', number = 4)
-graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'nerd immunity', number = 4)
-graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'Quarantina Aguilera', number = 3)
-graded_responses[[3]] <- changeGrading(graded_responses[[3]], team = 'nerd immunity', number = 8)
-
-
-graded_responses[[4]] <- changeGrading(graded_responses[[4]], team = 'nerd immunity', number = 8)
+#graded_responses[[1]] <- changeGrading(graded_responses[[1]], team = 'nerd immunity', number = 1)
 
 scored_list = vector('list')
-for (i in 1:4){
+for (i in 1:length(answers)){
   scored_list[[i]] <- graded_responses[[i]][, .(scores = sum(as.numeric(Correct))), by = Name]
   scored_list[[i]]$Round <- i
 }
 
-
-#the interlude format doesn't really fit in the same, so I'll write in manually
-graded_responses[['Interlude']] <- data.frame(Name = c('Quarantina Aguilera', 'HydroxyCALoquine', 'CAL機', 'nerd immunity',
-                                                       'Harem', 'Calenteam'),
-                 Number = c(2, 2, 1, 1, 3, 2),
-                 Answer = c('James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin'),
-                 #Correct = c(T, T, T, T, T, T),
-                 Correct = c(8, 8, 10, 10, 6, 8),
-                 Round = rep('Interlude', 6) )
-graded_responses[['Interlude']] <- setDT(graded_responses[['Interlude']])
-scored_list[['Interlude']] <- graded_responses[['Interlude']][, .(scores = sum(Correct)), by = Name]
+# #the interlude format doesn't really fit in the same, so I'll write in manually
+# graded_responses[['Interlude']] <- data.frame(Name = c('Quarantina Aguilera', 'HydroxyCALoquine', 'CAL機', 'nerd immunity',
+#                                                        'Harem', 'Calenteam'),
+#                  Number = c(2, 2, 1, 1, 3, 2),
+#                  Answer = c('James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin', 'James Baldwin'),
+#                  #Correct = c(T, T, T, T, T, T),
+#                  Correct = c(8, 8, 10, 10, 6, 8),
+#                  Round = rep('Interlude', 6) )
+# graded_responses[['Interlude']] <- setDT(graded_responses[['Interlude']])
+# scored_list[['Interlude']] <- graded_responses[['Interlude']][, .(scores = sum(Correct)), by = Name]
 all_scores <- do.call('rbind.fill', scored_list)
 setDT(all_scores)
 all_answers <- do.call(rbind.fill, graded_responses)
 
-all_scores[, .(scores = sum(scores)), by=Name]
+all_scores[, .(scores = sum(scores)), by=c('Round', 'Name')]
+
 write.csv(all_scores, 'all_scores.csv')
 #finals
 master <- do.call( 'rbind.fill', graded_responses)
