@@ -150,6 +150,9 @@ for (i in 1:length(answers)){
 # scored_list[['Interlude']] <- graded_responses[['Interlude']][, .(scores = sum(Correct)), by = Name]
 all_scores <- do.call('rbind.fill', scored_list)
 setDT(all_scores)
+
+# write scores to second sheet of answers google spreadsheet
+write_sheet(all_scores, ss = id_answers, sheet = 2)
 all_answers <- do.call(rbind.fill, graded_responses)
 
 all_scores[, .(scores = sum(scores)), by=c('Round', 'Name')]
