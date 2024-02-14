@@ -8,7 +8,7 @@ library(stringr)
 library(stringi)
 library(plyr)
 options(stringsAsFactors = F)
-setwd('~/repository//TriviaNight/')
+setwd('~/Documents/CAL/Real_Life/Repository//TriviaNight/')
 sheet_results <- drive_find(type = "spreadsheet")
 #sheet lookups by name
 ids <- vector('list')
@@ -154,8 +154,8 @@ setDT(all_scores)
 # write scores to second sheet of answers google spreadsheet
 write_sheet(all_scores, ss = id_answers, sheet = 2)
 all_answers <- do.call(rbind.fill, graded_responses)
-
-all_scores[, .(scores = sum(scores)), by=c('Round', 'Name')]
+setDT(all_answers)
+all_answers[, .(scores = sum(Correct)), by=c('TeamName')]
 
 write.csv(all_scores, 'all_scores.csv')
 #finals
