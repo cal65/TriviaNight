@@ -14,10 +14,17 @@ class QuestionaAdmin(admin.ModelAdmin):
         "question__contains",
         "answer__contains",
     )
-    list_display = ("game_id", "round", "question", "answer")
+    list_display = ("game_id", "round", "question", "answer", "points")
 
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     search_fields = ("session_id__contains", "team_name__contains", "answer__contains")
-    list_display = ("session_id", "team_name", "answer", "timestamp")
+    list_display = ("session_id", "team_name", "answer", "number", "timestamp", "points", "correct_numeric")
+
+@admin.register(Sessions)
+class SessionAdmin(admin.ModelAdmin):
+    search_fields = ("session_id__contains",)
+    list_display = ("session_id",)
+
+

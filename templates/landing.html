@@ -9,6 +9,7 @@
   <meta name="author" content="Cal Lee">
 
   <link rel="stylesheet" href="/static/css/styles.css">
+	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 
 </head>
 
@@ -19,13 +20,20 @@
 	</div>
 
 	<br>
-	<div class = "form-group">
-		<label for = "userInput">Username</label>
-		<input type="text" class="form-control" id="userInput" placeholder="Username">
+	<div class = "h1 form-group">
+		<label for = "sheet_id">Sheet ID</label>
+		<input type="text" class="form-control" id="sheet_id" placeholder="Sheet ID">
 	</div>
-	<div class ="center">
-		<button type="button" id = "button-load"> Load Questions </button>
-		<button type="button" id = "button-add"> Write Questions </button>
+	<div class = "h1 form-group">
+		<label for = "round_number">Round Number</label>
+		<input type="text" class="form-control" id="round_number" placeholder="Round Number">
+	</div>
+	<div><br><br></div>
+	<br>
+	<div class ="center px-4 rounded">
+		<button type="submit" class="bg-button" id = "button-load">Grade Answers </button>
+		<br>
+		<button type="submit" id = "button-add"> Plot Answers </button>
 	</div>
 	<br>
 	<div class="panel1" id="panel1" role="alert"> </div>
@@ -51,9 +59,6 @@
 	</script>
 </body>
 <br>
-<br>
-<b>
-	Hello
-</b>
+
 
 </html>

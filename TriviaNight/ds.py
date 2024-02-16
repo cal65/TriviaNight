@@ -1,6 +1,6 @@
+import Levenshtein
 import pandas as pd
 import plotly.figure_factory as ff
-
 
 def format_answers(df):
     df["Correct_Numeric"] = df["Correct"].astype(int)
@@ -8,6 +8,36 @@ def format_answers(df):
     df["Team_Number"] = pd.factorize(df["Name"])[0]
     return df
 
+
+def jaccard_similarity(str1, str2):
+    a = set(str1)
+    b = set(str2)
+    c = a.intersection(b)
+    return float(len(c)) / (len(a) + len(b) - len(c))
+
+
+def score_question(question, answer):
+    # Merge the two dataframes on the question
+    if answer in question:
+        correct_num = 1
+    else:
+        # string distance between question and answer
+        # help me
+        sim = 1 - (Levenshtein.distance(question, answer) / len(answer))
+        # find if closest to 0, 0.5 or 1 and return
+        correct_num = round(sim*2)/2
+    return correct_num
+
+
+def objects_to_df(objects):
+    df = pd.DataFrame.from_records(objects.values())
+    return df
+
+
+def match_questions_to_answers(questions, answers):
+
+
+    return
 
 def answer_heatmap(df):
     fig = ff.create_annotated_heatmap(
