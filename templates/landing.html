@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <title>Three Roads Meeting</title>
   <meta name="description" content="Three Roads Meeting">
   <meta name="author" content="Cal Lee">
@@ -13,6 +13,56 @@
 
 </head>
 
+<script>
+	function runScoring(){
+		var sheet_id = document.getElementById('sheet_id').value
+		var round_number = document.getElementById('round_number').value
+		$("#progress").toggle()
+		var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+		console.log(round_number)
+		$.ajax({
+				type: "POST",
+				url: "{% url 'run-answers' %}",
+				data: {'sheet_id': sheet_id, 'round_number': round_number},
+				headers: {'X-CSRFToken': csrftoken},
+				cache: false,
+				success: function (data) {
+					console.log("Success");
+					$("#progress").toggle();
+				},
+				error: function (data) {
+					console.log("Something went wrong");
+					$("#progress").toggle();
+				}
+			});
+    }
+
+
+	function plotAnswers(){
+		var sheet_id = document.getElementById('sheet_id').value
+		var round_number = document.getElementById('round_number').value
+		$("#progress").toggle()
+		var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+		console.log(round_number)
+		$.ajax({
+				type: "POST",
+				url: "{% url 'plot-heatmap' %}",
+				data: {'sheet_id': sheet_id, 'round_number': round_number},
+				headers: {'X-CSRFToken': csrftoken},
+				cache: false,
+				success: function (data) {
+					console.log("Success");
+					$("#progress").toggle();
+				},
+				error: function (data) {
+					console.log("Something went wrong");
+					$("#progress").toggle();
+				}
+			});
+	}
+</script>
+
+
 <body>
 	<div class="head-div">
 		<img id="panel" class="QuestionPanel--block" src="/static/question_panel.jpg" style="width:100x; height:180px;"></img>
@@ -21,19 +71,25 @@
 
 	<br>
 	<div class = "h1 form-group">
+		{% csrf_token %}
 		<label for = "sheet_id">Sheet ID</label>
 		<input type="text" class="form-control" id="sheet_id" placeholder="Sheet ID">
 	</div>
 	<div class = "h1 form-group">
+		{% csrf_token %}
 		<label for = "round_number">Round Number</label>
 		<input type="text" class="form-control" id="round_number" placeholder="Round Number">
 	</div>
+	<div id = "progress"  class="upload-text" style="display: none;" >
+                <p style="float: left;">Beginning ...</p>
+        </div>
 	<div><br><br></div>
 	<br>
 	<div class ="center px-4 rounded">
-		<button type="submit" class="bg-button" id = "button-load">Grade Answers </button>
+		{% csrf_token %}
+		<button onclick="runScoring()" class="bg-button" id = "button-load">Grade Answers </button>
 		<br>
-		<button type="submit" id = "button-add"> Plot Answers </button>
+		<button  onclick="plotAnswers()" class="bg-button"  id = "button-add"> Plot Answers </button>
 	</div>
 	<br>
 	<div class="panel1" id="panel1" role="alert"> </div>
@@ -41,21 +97,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 	<script>
-	$(document).ready(function() {
-		$('#button-load').on('click', function(event) {
-					$.ajax({
-						data : { 
-							user: $('#userInput').val()
-						},
-						type : 'POST',
-						url : '/load-question'
-					})
-					.done(function(data){
-						$('#panel1').text(data.question).show(200);
-						$('$hidden-button-1').show(200);
-					});
-		});
-	});
 	</script>
 </body>
 <br>

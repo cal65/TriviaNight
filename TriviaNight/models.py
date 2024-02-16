@@ -20,6 +20,7 @@ class Answer(models.Model):
     team_name = models.CharField(max_length=250)
     answer = models.CharField(max_length=2500)
     number = models.IntegerField()
+    round = models.IntegerField()
     timestamp = models.DateTimeField()
     correct_numeric = models.FloatField()
     points = models.IntegerField()

@@ -26,6 +26,7 @@ def score_question(question, answer):
         sim = 1 - (Levenshtein.distance(question, answer) / len(answer))
         # find if closest to 0, 0.5 or 1 and return
         correct_num = round(sim*2)/2
+        correct_num = max(0, correct_num)
     return correct_num
 
 
@@ -65,3 +66,11 @@ def answer_heatmap(df):
         title="Heatmap of Correct_Numeric values",
     )
     return fig
+
+
+def run_heatmap(answers, round_number):
+    answers = format_answers(answers)
+    fig = answer_heatmap(answers)
+    fig.write_html(f"templates/Graphs/heatmap_{round_number}.html")
+    return fig
+

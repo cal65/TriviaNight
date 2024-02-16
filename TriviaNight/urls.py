@@ -15,6 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from questions.views import *
+from TriviaNight.views import *
 
-urlpatterns = [path("admin/", admin.site.urls), path("", index, name="index")]
+urlpatterns = [path("admin/", admin.site.urls), path("", index, name="index"),
+               path("run-answers/", run_answers, name="run-answers"),
+               path("plot-heatmap/", plot_heatmap, name="plot-heatmap"),
+               path("heatmap/", heatmap_view, name="heatmap")]

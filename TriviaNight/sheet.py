@@ -7,8 +7,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 import pandas as pd
-from models import Answer, Sessions, Question
-from ds import score_question, objects_to_df
+from .models import Answer, Sessions, Question
+from .ds import score_question, objects_to_df
 
 # initiate google sheets read objects
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
@@ -28,7 +28,7 @@ def get_spreadsheet_data(sheet_id, sheet_name):
     return df
 
 
-def ingest_answers(df, correct_answers, points, game_id, session):
+def ingest_answers(df, correct_answers, points, game_id, round, session):
     for i, row in df.iterrows():
         team_name = row[1]
         timestamp = pd.to_datetime(row["Timestamp"])
@@ -38,6 +38,7 @@ def ingest_answers(df, correct_answers, points, game_id, session):
             answer.timestamp = timestamp
             answer.team_name = team_name
             answer.game_id = game_id
+            answer.round = round
             answer.answer = row[j]
             answer.session_id = session
             answer.number = j - 1
@@ -73,7 +74,8 @@ def grade_answers_from_sheets(sheet_id, game_id, round_number, sheet_name = 'For
                               ):
     responses = get_spreadsheet_data(sheet_id, sheet_name)
     answers = objects_to_df(Question.objects.filter(game_id=game_id, round=round_number))
+    session = Sessions.objects.get(session_id=2)
     ingest_answers(responses, correct_answers=answers['answer'],
-                   points=answers['points'], game_id=game_id, session=2)
+                   points=answers['points'], game_id=game_id, session=session)
 
     return
