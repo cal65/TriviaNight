@@ -17,7 +17,4 @@ from django.contrib import admin
 from django.urls import path
 from questions.views import *
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', index, name="indx")
-]
+urlpatterns = [path("admin/", admin.site.urls), path("", index, name="index")]

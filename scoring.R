@@ -94,10 +94,10 @@ gradeResponses <- function(round_num, melted_response, max_dist=0.2){
   return(melted_response)
 }
 
-cr <- 1 # current round
+cr <- 2 # current round
 responses[[cr]] <- getResponses(cr)
-responses_melted[[1]] <- formatForAnswers(responses[[1]])
-graded_responses[[1]] <- gradeResponses(1, responses_melted[[1]])
+responses_melted[[cr]] <- formatForAnswers(responses[[cr]])
+graded_responses[[cr]] <- gradeResponses(cr, responses_melted[[cr]])
 
 #plot function
 plot_graded_answers <- function(graded_df, round_num, save = T){
