@@ -60,6 +60,28 @@
 				}
 			});
 	}
+
+	function plotScores(){
+		var game_id = 'feb'
+		$("#progress").toggle()
+		var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+		console.log(round_number)
+		$.ajax({
+				type: "POST",
+				url: "{% url 'plot-team-scores' %}",
+				data: {'sheet_id': sheet_id, 'round_number': round_number},
+				headers: {'X-CSRFToken': csrftoken},
+				cache: false,
+				success: function (data) {
+					console.log("Success");
+					$("#progress").toggle();
+				},
+				error: function (data) {
+					console.log("Something went wrong");
+					$("#progress").toggle();
+				}
+			});
+	}
 </script>
 
 
@@ -90,8 +112,11 @@
 		<button onclick="runScoring()" class="bg-button" id = "button-load">Grade Answers </button>
 		<br>
 		<button  onclick="plotAnswers()" class="bg-button"  id = "button-add"> Plot Answers </button>
+		<br>
+		<button  onclick="plotScores()" class="bg-button"  id = "button-scores"> Get Scores </button>
 	</div>
 	<br>
+
 	<div class="panel1" id="panel1" role="alert"> </div>
 	<button type="hidden-button" id = "hidden-button-1"> Next Question </button>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

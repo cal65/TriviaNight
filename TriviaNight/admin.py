@@ -20,7 +20,7 @@ class QuestionaAdmin(admin.ModelAdmin):
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     search_fields = ("session_id__contains", "team_name__contains", "answer__contains")
-    list_display = ("session_id", "team_name", "answer", "number", "timestamp", "points", "correct_numeric")
+    list_display = ("session_id", "round", "number", "team_name", "answer", "points", "correct_numeric", "timestamp")
 
 @admin.register(Sessions)
 class SessionAdmin(admin.ModelAdmin):

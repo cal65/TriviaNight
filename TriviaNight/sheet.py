@@ -22,7 +22,7 @@ sheet = service.spreadsheets()
 
 
 def get_spreadsheet_data(sheet_id, sheet_name):
-    data_range = f"{sheet_name}!A1:M20"
+    data_range = f"{sheet_name}!A1:Z20"
     result = sheet.values().get(spreadsheetId=sheet_id, range=data_range).execute()
     df = pd.DataFrame(result["values"][1:], columns=result["values"][0])
     return df
@@ -76,6 +76,8 @@ def grade_answers_from_sheets(sheet_id, game_id, round_number, sheet_name = 'For
     answers = objects_to_df(Question.objects.filter(game_id=game_id, round=round_number))
     session = Sessions.objects.get(session_id=2)
     ingest_answers(responses, correct_answers=answers['answer'],
-                   points=answers['points'], game_id=game_id, session=session)
+                   points=answers['points'], game_id=game_id,
+                   round=round_number,
+                   session=session)
 
     return

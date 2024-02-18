@@ -20,4 +20,5 @@ from TriviaNight.views import *
 urlpatterns = [path("admin/", admin.site.urls), path("", index, name="index"),
                path("run-answers/", run_answers, name="run-answers"),
                path("plot-heatmap/", plot_heatmap, name="plot-heatmap"),
-               path("heatmap/", heatmap_view, name="heatmap")]
+               path("heatmap/", heatmap_view, name="heatmap"),
+               path("plot-team-scores/", plot_team_scores, name="plot-team-scores")]
